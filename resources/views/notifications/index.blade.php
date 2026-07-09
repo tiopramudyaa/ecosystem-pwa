@@ -1,91 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Notifikasi - EcoSystem Lite</title>
-    <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; }
-        .notif { border: 1px solid #ddd; border-radius: 6px; padding: 10px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-        .notif.unread { background: #eef4ff; border-color: #b6d0ff; }
-        .notif-body { flex: 1; }
-        .notif-body.notif-clickable { cursor: pointer; }
-        .notif-meta { font-size: 12px; color: #666; margin-bottom: 4px; }
-        .notif-actions { display: flex; gap: 8px; white-space: nowrap; }
-        .notif-actions form { margin: 0; }
-        .notif-actions button { font-size: 12px; }
-    </style>
-</head>
-<body>
-    <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h1>Notifikasi</h1>
-        <a href="{{ route('dashboard') }}">&larr; Dashboard</a>
+@extends('layouts.app')
+
+@section('title', 'Notifikasi')
+
+@section('content')
+    @php $unreadCount = collect($notifications)->filter(fn ($n) => !($n['is_read'] ?? false))->count(); @endphp
+    <div class="flex items-center justify-between mb-4">
+        <p class="text-sm text-gray-600">
+            @if ($unreadCount > 0)
+                <span class="font-semibold text-gray-900">{{ $unreadCount }}</span> belum dibaca
+            @else
+                Semua notifikasi sudah dibaca
+            @endif
+        </p>
+        <div class="flex gap-2">
+            <form method="POST" action="{{ route('notifications.read-all') }}">
+                @csrf
+                @method('PUT')
+                <button type="submit" class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-sm text-gray-700 hover:bg-gray-50">
+                    <i class="fas fa-check-double text-xs mr-1"></i> Tandai Semua Dibaca
+                </button>
+            </form>
+            <form method="POST" action="{{ route('notifications.bulk-delete') }}">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-sm text-gray-700 hover:bg-gray-50">
+                    <i class="fas fa-trash text-xs mr-1"></i> Hapus yang Sudah Dibaca
+                </button>
+            </form>
+        </div>
     </div>
 
-    @if (session('status'))
-        <p style="color: green;">{{ session('status') }}</p>
-    @endif
-
-    @if ($errors->any())
-        <p style="color: red;">{{ $errors->first() }}</p>
-    @endif
-
-    <div style="display:flex; gap:8px; margin-bottom:16px;">
-        <form method="POST" action="{{ route('notifications.read-all') }}">
-            @csrf
-            @method('PUT')
-            <button type="submit">Tandai Semua Dibaca</button>
-        </form>
-        <form method="POST" action="{{ route('notifications.bulk-delete') }}">
-            @csrf
-            @method('DELETE')
-            <button type="submit">Hapus yang Sudah Dibaca</button>
-        </form>
-    </div>
-
-    @forelse ($notifications as $notification)
-        @php
-            $ticketUrl = !empty($notification['ticket_id'])
-                ? route('tickets.show', $notification['ticket_id']) . (!empty($notification['message_id']) ? ('?highlight_message_id=' . $notification['message_id']) : '')
-                : null;
-        @endphp
-        <div class="notif {{ ($notification['is_read'] ?? false) ? '' : 'unread' }}">
-            <div
-                class="notif-body {{ $ticketUrl ? 'notif-clickable' : '' }}"
-                @if ($ticketUrl)
-                    data-ticket-url="{{ $ticketUrl }}"
-                    data-read-url="{{ route('notifications.read', $notification['id']) }}"
-                    data-is-read="{{ ($notification['is_read'] ?? false) ? '1' : '0' }}"
-                    onclick="openNotification(this)"
-                @endif
-            >
-                <div class="notif-meta">{{ $notification['from_name'] ?? '-' }} &middot; {{ $notification['created_at'] ?? '-' }}</div>
-                <div>
-                    @if (!empty($notification['ticket_number']))
-                        <strong>{{ $notification['ticket_number'] }}</strong> &mdash;
+    <div class="space-y-2">
+        @forelse ($notifications as $notification)
+            @php
+                $ticketUrl = !empty($notification['ticket_id'])
+                    ? route('tickets.show', $notification['ticket_id']) . (!empty($notification['message_id']) ? ('?highlight_message_id=' . $notification['message_id']) : '')
+                    : null;
+            @endphp
+            <div class="relative rounded-xl border p-4 pl-5 flex items-start justify-between gap-3 {{ ($notification['is_read'] ?? false) ? 'bg-white border-gray-200' : 'bg-blue-50 border-blue-200' }}">
+                @unless ($notification['is_read'] ?? false)
+                    <span class="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl bg-blue-500"></span>
+                @endunless
+                <div
+                    class="flex-1 {{ $ticketUrl ? 'cursor-pointer' : '' }}"
+                    @if ($ticketUrl)
+                        data-ticket-url="{{ $ticketUrl }}"
+                        data-read-url="{{ route('notifications.read', $notification['id']) }}"
+                        data-is-read="{{ ($notification['is_read'] ?? false) ? '1' : '0' }}"
+                        onclick="openNotification(this)"
                     @endif
-                    {{ $notification['preview'] ?? '' }}
+                >
+                    <div class="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
+                        <i class="fas fa-circle-user text-gray-400"></i>
+                        <span>{{ $notification['from_name'] ?? '-' }}</span>
+                        <span>&middot;</span>
+                        <span>{{ $notification['created_at'] ?? '-' }}</span>
+                    </div>
+                    <div class="text-sm text-gray-800">
+                        @if (!empty($notification['ticket_number']))
+                            <strong class="primary-text">{{ $notification['ticket_number'] }}</strong> &mdash;
+                        @endif
+                        {{ $notification['preview'] ?? '' }}
+                    </div>
+                </div>
+                <div class="flex gap-2 whitespace-nowrap">
+                    @if (!($notification['is_read'] ?? false))
+                        <form method="POST" action="{{ route('notifications.read', $notification['id']) }}">
+                            @csrf
+                            @method('PUT')
+                            <button type="submit" class="text-xs px-2 py-1 rounded-md bg-white border border-gray-200 text-gray-700 hover:bg-gray-50">Tandai Dibaca</button>
+                        </form>
+                    @endif
+                    <form method="POST" action="{{ route('notifications.destroy', $notification['id']) }}">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-xs px-2 py-1 rounded-md bg-white border border-gray-200 text-red-600 hover:bg-red-50">Hapus</button>
+                    </form>
                 </div>
             </div>
-            <div class="notif-actions">
-                @if (!($notification['is_read'] ?? false))
-                    <form method="POST" action="{{ route('notifications.read', $notification['id']) }}">
-                        @csrf
-                        @method('PUT')
-                        <button type="submit">Tandai Dibaca</button>
-                    </form>
-                @endif
-                <form method="POST" action="{{ route('notifications.destroy', $notification['id']) }}">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit">Hapus</button>
-                </form>
+        @empty
+            <div class="bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-400">
+                <i class="fas fa-bell-slash text-2xl mb-2"></i>
+                <p class="text-sm">Belum ada notifikasi.</p>
             </div>
-        </div>
-    @empty
-        <p>Belum ada notifikasi.</p>
-    @endforelse
+        @endforelse
+    </div>
+@endsection
 
+@push('scripts')
     <script>
         function openNotification(el) {
             var url = el.getAttribute('data-ticket-url');
@@ -110,5 +112,4 @@
             });
         }
     </script>
-</body>
-</html>
+@endpush

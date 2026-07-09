@@ -8,7 +8,7 @@ use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -22,6 +22,10 @@ Route::middleware('lite_api.auth')->group(function () {
     Route::get('/tickets/{id}', [TicketController::class, 'show'])->whereNumber('id')->name('tickets.show');
     Route::patch('/tickets/{id}/status', [TicketController::class, 'updateStatus'])->whereNumber('id')->name('tickets.status');
     Route::post('/tickets/{id}/messages', [TicketController::class, 'storeMessage'])->whereNumber('id')->name('tickets.messages.store');
+    Route::get('/tickets/{id}/messages/poll', [TicketController::class, 'pollMessages'])->whereNumber('id')->name('tickets.messages.poll');
+    Route::post('/tickets/{id}/messages/{messageId}/internal-note', [TicketController::class, 'updateNote'])->whereNumber(['id', 'messageId'])->name('tickets.messages.note.update');
+    Route::delete('/tickets/{id}/messages/{messageId}/internal-note', [TicketController::class, 'destroyNote'])->whereNumber(['id', 'messageId'])->name('tickets.messages.note.destroy');
+    Route::get('/tickets/attachments/{attachmentId}', [TicketController::class, 'attachment'])->whereNumber('attachmentId')->name('tickets.attachments.show');
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::patch('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
 

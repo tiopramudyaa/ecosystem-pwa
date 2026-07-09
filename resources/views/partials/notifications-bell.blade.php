@@ -1,6 +1,6 @@
-<a href="{{ route('notifications.index') }}" style="position:relative; text-decoration:none;">
-    &#128276; Notifikasi
-    <span id="notif-badge" style="display:none; background:#e02424; color:#fff; border-radius:10px; padding:0 6px; font-size:11px; position:relative; top:-8px;"></span>
+<a href="{{ route('notifications.index') }}" class="relative text-gray-600 hover:text-gray-900" title="Notifikasi">
+    <i class="fas fa-bell text-lg"></i>
+    <span id="notif-badge" class="hidden absolute -top-1.5 -right-2 bg-red-600 text-white text-[10px] font-bold leading-none rounded-full px-1.5 py-0.5"></span>
 </a>
 <script>
     (function () {
@@ -13,9 +13,9 @@
                     if (!data || !data.success) return;
                     if (data.count > 0) {
                         badge.textContent = data.count;
-                        badge.style.display = 'inline';
+                        badge.classList.remove('hidden');
                     } else {
-                        badge.style.display = 'none';
+                        badge.classList.add('hidden');
                     }
                 })
                 .catch(function () {});
