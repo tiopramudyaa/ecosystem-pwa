@@ -39,4 +39,8 @@ return [
         'base_url' => env('LITE_API_BASE_URL', 'http://127.0.0.1:8000/api/lite'),
     ],
 
+    'vapid' => [
+        'public_key' => env('VAPID_PUBLIC_KEY'),
+    ],
+
 ];

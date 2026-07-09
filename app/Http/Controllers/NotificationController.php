@@ -16,15 +16,33 @@ class NotificationController extends Controller
     {
         $response = $this->liteApi->get('/notifications');
 
-        if ($this->handleUnauthorized($response)) {
+        if ($response->status() === 401) {
+            Session::forget(['lite_api_token', 'lite_api_user']);
+
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false], 401);
+            }
+
             return redirect()->route('login')->withErrors([
                 'email' => 'Sesi berakhir, silakan login kembali.',
             ]);
         }
 
         if (! $response->successful()) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false], $response->status());
+            }
+
             return back()->withErrors([
                 'notifications' => $response->json('message', 'Gagal memuat notifikasi.'),
+            ]);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $response->json('data', []),
+                'unread_count' => $response->json('unread_count', 0),
             ]);
         }
 
@@ -121,6 +139,26 @@ class NotificationController extends Controller
         }
 
         return back()->with('status', 'Notifikasi yang sudah dibaca berhasil dihapus.');
+    }
+
+    public function pushSubscribe(Request $request)
+    {
+        $data = $request->validate([
+            'endpoint' => ['required', 'string'],
+            'keys' => ['required', 'array'],
+            'keys.p256dh' => ['required', 'string'],
+            'keys.auth' => ['required', 'string'],
+        ]);
+
+        $response = $this->liteApi->post('/push-subscriptions', $data);
+
+        if ($response->status() === 401) {
+            Session::forget(['lite_api_token', 'lite_api_user']);
+
+            return response()->json(['success' => false], 401);
+        }
+
+        return response()->json(['success' => $response->successful()], $response->status());
     }
 
     protected function handleUnauthorized($response): bool

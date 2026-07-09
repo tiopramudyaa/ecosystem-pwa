@@ -42,7 +42,7 @@
                     <span class="absolute left-0 top-0 bottom-0 w-1 rounded-l-xl bg-blue-500"></span>
                 @endunless
                 <div
-                    class="flex-1 {{ $ticketUrl ? 'cursor-pointer' : '' }}"
+                    class="flex-1 min-w-0 {{ $ticketUrl ? 'cursor-pointer' : '' }}"
                     @if ($ticketUrl)
                         data-ticket-url="{{ $ticketUrl }}"
                         data-read-url="{{ route('notifications.read', $notification['id']) }}"
@@ -56,7 +56,7 @@
                         <span>&middot;</span>
                         <span>{{ $notification['created_at'] ?? '-' }}</span>
                     </div>
-                    <div class="text-sm text-gray-800">
+                    <div class="text-sm text-gray-800 break-words">
                         @if (!empty($notification['ticket_number']))
                             <strong class="primary-text">{{ $notification['ticket_number'] }}</strong> &mdash;
                         @endif

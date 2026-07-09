@@ -2,6 +2,7 @@
 
 @section('title', $ticket['ticket_number'] ?? 'Ticket')
 @section('hideBottomNav', 'yes')
+@section('backUrl', route('tickets.index'))
 
 @section('subtitle')
     <span class="truncate" title="{{ $ticket['description'] ?? '-' }}">{{ $ticket['description'] ?? '-' }}</span>
@@ -29,8 +30,9 @@
         }
 
         .bubble-own {
-            background: linear-gradient(135deg, rgb(var(--primary-dark-rgb)), rgb(var(--primary-rgb)));
-            color: #fff;
+            background: #ffffff;
+            color: #111827;
+            border: 1px solid #e5e7eb;
             border-radius: 16px 16px 4px 16px;
         }
 
@@ -814,12 +816,28 @@
                 if (event.target === editModal) closeEditModal();
             });
 
+            var editSaveBtnHtml = editSaveBtn.innerHTML;
+
+            function setButtonLoading(btn, originalHtml, loading) {
+                if (!btn) return;
+                btn.disabled = loading;
+                btn.classList.toggle('opacity-70', loading);
+                btn.classList.toggle('cursor-not-allowed', loading);
+                btn.innerHTML = loading ? '<span class="spinner"></span>' : originalHtml;
+
+                if (window.AppLoading) {
+                    if (loading) window.AppLoading.show(); else window.AppLoading.hide();
+                }
+            }
+
             editSaveBtn.addEventListener('click', function () {
                 if (!activeMessageEl) return;
 
                 var messageId = activeMessageEl.getAttribute('data-message-id');
                 var newMessage = editTextarea.value.trim();
                 if (newMessage === '') return;
+
+                setButtonLoading(editSaveBtn, editSaveBtnHtml, true);
 
                 requestJson('/tickets/' + ticketId + '/messages/' + messageId + '/internal-note', {
                     method: 'POST',
@@ -855,13 +873,15 @@
                     closeEditModal();
                 }).catch(function () {
                     showToast('Gagal menghubungi server.', true);
+                }).finally(function () {
+                    setButtonLoading(editSaveBtn, editSaveBtnHtml, false);
                 });
             });
 
             function deleteNote(messageEl) {
                 var messageId = messageEl.getAttribute('data-message-id');
 
-                requestJson('/tickets/' + ticketId + '/messages/' + messageId + '/internal-note', {
+                return requestJson('/tickets/' + ticketId + '/messages/' + messageId + '/internal-note', {
                     method: 'DELETE',
                     headers: {
                         'Accept': 'application/json',
@@ -915,10 +935,23 @@
                 });
             }
             if (deleteConfirmBtn) {
+                var deleteConfirmBtnHtml = deleteConfirmBtn.innerHTML;
+
                 deleteConfirmBtn.addEventListener('click', function () {
                     var messageEl = pendingDeleteMessageEl;
-                    closeDeleteModal();
-                    if (messageEl) deleteNote(messageEl);
+                    if (!messageEl) {
+                        closeDeleteModal();
+                        return;
+                    }
+
+                    setButtonLoading(deleteConfirmBtn, deleteConfirmBtnHtml, true);
+                    if (deleteCancelBtn) deleteCancelBtn.disabled = true;
+
+                    deleteNote(messageEl).finally(function () {
+                        setButtonLoading(deleteConfirmBtn, deleteConfirmBtnHtml, false);
+                        if (deleteCancelBtn) deleteCancelBtn.disabled = false;
+                        closeDeleteModal();
+                    });
                 });
             }
 
@@ -1033,6 +1066,28 @@
             }
 
             setInterval(pollMessages, 8000);
+        })();
+
+        (function () {
+            var form = document.getElementById('chat-form');
+            var sendBtn = form ? form.querySelector('button[type="submit"]') : null;
+            if (!form || !sendBtn) return;
+
+            var originalHtml = sendBtn.innerHTML;
+
+            form.addEventListener('submit', function (event) {
+                if (event.defaultPrevented) return;
+
+                sendBtn.disabled = true;
+                sendBtn.classList.add('opacity-70', 'cursor-not-allowed');
+                sendBtn.innerHTML = '<span class="spinner"></span>';
+            });
+
+            window.addEventListener('pageshow', function () {
+                sendBtn.disabled = false;
+                sendBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                sendBtn.innerHTML = originalHtml;
+            });
         })();
     </script>
 @endpush

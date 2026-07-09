@@ -41,7 +41,7 @@
     $replyToBody = is_array($replyToPreview) ? trim((string) ($replyToPreview['message_body'] ?? '')) : '';
 @endphp
 <div id="msg-{{ $message['id'] ?? '' }}"
-     class="message flex items-end gap-2 py-1 {{ $isOwn ? 'justify-end' : 'justify-start' }}"
+     class="message flex items-end gap-2 py-1 min-w-0 max-w-full {{ $isOwn ? 'justify-end' : 'justify-start' }}"
      @if ($isNote)
          data-note-message="true"
          data-message-id="{{ $message['id'] ?? '' }}"
@@ -55,7 +55,7 @@
         </span>
     @endunless
 
-    <div class="bubble {{ $isOwn ? 'bubble-own' : 'bubble-other' }} {{ $isNote ? 'bubble-note' : '' }} px-3.5 py-2 shadow-sm">
+    <div class="bubble {{ $isOwn ? 'bubble-own' : 'bubble-other' }} {{ $isNote ? 'bubble-note' : '' }} min-w-0 px-3.5 py-2 shadow-sm">
         @if ($isNote)
             <div class="flex items-center justify-between gap-2 mb-1">
                 <div class="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700">
@@ -82,7 +82,7 @@
         @endif
 
         @if ($replyToId && $replyToPreview)
-            <div class="reply-quote-ref cursor-pointer mb-1.5 pl-2 border-l-2 {{ $isNote ? 'border-amber-400/70' : ($isOwn ? 'border-white/50' : 'border-gray-300') }} opacity-80 hover:opacity-100"
+            <div class="reply-quote-ref cursor-pointer mb-1.5 pl-2 border-l-2 {{ $isNote ? 'border-amber-400/70' : 'border-gray-300' }} opacity-80 hover:opacity-100"
                  data-scroll-to-message="{{ $replyToId }}">
                 <div class="text-[10px] font-semibold truncate">{{ $replyToSenderName }}</div>
                 <div class="text-[11px] truncate">{{ \Illuminate\Support\Str::limit($replyToBody, 80) ?: '(pesan)' }}</div>
@@ -109,9 +109,9 @@
                              data-lightbox-filename="{{ $attachment['file_name'] ?? 'lampiran' }}" loading="lazy">
                     @else
                         <a href="{{ $attachment['url'] }}" target="_blank" rel="noopener"
-                           class="flex items-center gap-2 text-xs underline {{ $isOwn && !$isNote ? 'text-white' : 'text-blue-600' }}">
-                            <i class="fas fa-paperclip"></i>
-                            {{ $attachment['file_name'] ?? 'Lampiran' }}
+                           class="flex items-center gap-2 text-xs underline break-all text-blue-600">
+                            <i class="fas fa-paperclip shrink-0"></i>
+                            <span class="break-all">{{ $attachment['file_name'] ?? 'Lampiran' }}</span>
                         </a>
                     @endif
                 @endforeach
@@ -119,7 +119,7 @@
         @endif
 
         @if ($showSenderName || $hasInlineSignature)
-            <div class="text-[9px] italic font-semibold mt-1 text-right {{ $isOwn && !$isNote ? 'text-white text-opacity-90' : 'primary-text' }}">{{ $displaySenderName }}</div>
+            <div class="text-[9px] italic font-semibold mt-1 text-right primary-text">{{ $displaySenderName }}</div>
         @endif
 
         @if ($emailFailed)
@@ -129,7 +129,7 @@
             </div>
         @endif
 
-        <div class="text-[10px] mt-0.5 text-right {{ $isOwn && !$isNote ? 'text-white text-opacity-70' : 'text-gray-400' }}">
+        <div class="text-[10px] mt-0.5 text-right text-gray-400">
             {{ $formatMessageTime($message['created_at'] ?? null) }}
         </div>
     </div>

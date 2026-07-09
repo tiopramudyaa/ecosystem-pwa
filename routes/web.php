@@ -35,4 +35,6 @@ Route::middleware('lite_api.auth')->group(function () {
     Route::delete('/notifications/bulk-delete', [NotificationController::class, 'bulkDelete'])->name('notifications.bulk-delete');
     Route::put('/notifications/{id}/read', [NotificationController::class, 'markRead'])->whereNumber('id')->name('notifications.read');
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->whereNumber('id')->name('notifications.destroy');
+
+    Route::post('/push-subscriptions', [NotificationController::class, 'pushSubscribe'])->name('push-subscriptions.store');
 });

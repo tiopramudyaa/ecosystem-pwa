@@ -12,6 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trust reverse proxy forwarded headers (X-Forwarded-Proto/Host/etc).
+        // Needed so route()/url() generate https:// URLs when served through
+        // a TLS-terminating tunnel (e.g. ngrok) instead of always falling back
+        // to http:// — otherwise browsers block fetch()/form submissions from
+        // the https page as mixed content. Direct http://localhost access is
+        // unaffected since there's no forwarded header to trust in that case.
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'lite_api.auth' => \App\Http\Middleware\EnsureLiteApiAuthenticated::class,
         ]);
