@@ -1,0 +1,42 @@
+<?php
+
+/**
+ * This is a modified copy of public/index.php for cPanel deployments where
+ * the contents of public/ have been moved into public_html/, while the rest
+ * of the Laravel app (app/, bootstrap/, vendor/, storage/, .env, etc.) lives
+ * in a sibling folder outside public_html — e.g. /home/USERNAME/ecosystem-pwa.
+ *
+ * SETUP:
+ * 1. Replace APP_FOLDER_NAME below with the actual folder name you extracted
+ *    the app into (the one sitting next to public_html, NOT public_html itself).
+ * 2. Upload this file INTO public_html as index.php (overwriting the one that
+ *    came from public/).
+ */
+
+const APP_FOLDER_NAME = 'ecosystem-pwa'; // <-- change if your folder name differs
+
+use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
+
+define('LARAVEL_START', microtime(true));
+
+$appBasePath = __DIR__.'/../'.APP_FOLDER_NAME;
+
+// Determine if the application is in maintenance mode...
+if (file_exists($maintenance = $appBasePath.'/storage/framework/maintenance.php')) {
+    require $maintenance;
+}
+
+// Register the Composer autoloader...
+require $appBasePath.'/vendor/autoload.php';
+
+// Bootstrap Laravel and handle the request...
+/** @var Application $app */
+$app = require_once $appBasePath.'/bootstrap/app.php';
+
+// Point Laravel's public_path() back at THIS directory (public_html), since
+// it no longer sits at <app-root>/public — needed so @vite()/asset() find
+// build/manifest.json correctly.
+$app->usePublicPath(__DIR__);
+
+$app->handleRequest(Request::capture());
