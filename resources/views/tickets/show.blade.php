@@ -60,6 +60,23 @@
             max-height: 6.5rem;
         }
 
+        .mention-highlight {
+            background-color: rgba(37, 99, 235, 0.12);
+            color: #1d4ed8;
+            border-radius: 4px;
+            padding: 0 2px;
+            font-weight: 600;
+        }
+
+        .mention-highlight-self {
+            background-color: rgba(217, 119, 6, 0.18);
+            color: #92400e;
+        }
+
+        .mention-item.is-active {
+            background-color: #f9fafb;
+        }
+
         @media (max-width: 1023.98px) {
             form.chat-input-bar {
                 position: fixed !important;
@@ -219,6 +236,8 @@
                 <i class="fas fa-times text-xs"></i>
             </button>
         </div>
+
+        <div id="mention-dropdown" class="hidden absolute left-0 right-0 bottom-full mb-2 z-20 bg-white border border-gray-200 rounded-xl shadow-lg max-h-56 overflow-y-auto text-sm"></div>
 
         <input type="checkbox" id="note_toggle" class="peer sr-only" onchange="document.getElementById('message_type').value = this.checked ? 'internal_note' : 'reply'; window.toggleComposerOptionsForNote && window.toggleComposerOptionsForNote(this.checked);">
         <label for="note_toggle"
@@ -1066,6 +1085,227 @@
             }
 
             setInterval(pollMessages, 8000);
+        })();
+
+        (function () {
+            var textarea = document.getElementById('chat-textarea');
+            var form = document.getElementById('chat-form');
+            var noteToggle = document.getElementById('note_toggle');
+            var dropdown = document.getElementById('mention-dropdown');
+            var mentionableUrl = '{{ route('employees.mentionable') }}';
+
+            if (!textarea || !form || !dropdown) return;
+
+            var pendingMentions = [];
+            var debounceTimer = null;
+            var activeIndex = -1;
+            var mentionStart = -1;
+            var currentItems = [];
+            var fetchToken = 0;
+
+            function initialsOf(name) {
+                name = (name || '').trim();
+                if (name === '') return '?';
+                return name.split(/\s+/).map(function (part) {
+                    return part.charAt(0).toUpperCase();
+                }).slice(0, 2).join('');
+            }
+
+            function closeDropdown() {
+                dropdown.classList.add('hidden');
+                dropdown.innerHTML = '';
+                mentionStart = -1;
+                activeIndex = -1;
+                currentItems = [];
+            }
+
+            function detectMentionTrigger() {
+                if (!noteToggle || !noteToggle.checked) return null;
+
+                var cursor = textarea.selectionStart;
+                var value = textarea.value;
+                var at = value.lastIndexOf('@', cursor - 1);
+                if (at === -1) return null;
+
+                var between = value.slice(at + 1, cursor);
+                if (/\s/.test(between)) return null;
+                if (at > 0 && !/[\s(]/.test(value.charAt(at - 1))) return null;
+
+                return { start: at, query: between };
+            }
+
+            function highlightActive() {
+                var rows = dropdown.querySelectorAll('.mention-item');
+                rows.forEach(function (row, idx) {
+                    row.classList.toggle('is-active', idx === activeIndex);
+                });
+            }
+
+            function renderDropdown(employees, roles) {
+                currentItems = [];
+                dropdown.innerHTML = '';
+
+                function addGroup(label, items, type) {
+                    if (!items.length) return;
+
+                    var groupLabel = document.createElement('div');
+                    groupLabel.className = 'px-3 pt-2 pb-1 text-[10px] font-semibold uppercase text-gray-400';
+                    groupLabel.textContent = label;
+                    dropdown.appendChild(groupLabel);
+
+                    items.forEach(function (item) {
+                        var row = document.createElement('button');
+                        row.type = 'button';
+                        row.className = 'mention-item w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-gray-50';
+
+                        var avatar = document.createElement('span');
+                        avatar.className = 'shrink-0 w-7 h-7 rounded-full primary-gradient text-white text-[11px] font-semibold flex items-center justify-center';
+                        avatar.textContent = type === 'role' ? '#' : initialsOf(item.name);
+                        row.appendChild(avatar);
+
+                        var textWrap = document.createElement('span');
+                        textWrap.className = 'min-w-0 flex-1';
+
+                        var nameEl = document.createElement('span');
+                        nameEl.className = 'block text-sm text-gray-800 truncate';
+                        nameEl.textContent = item.name;
+                        textWrap.appendChild(nameEl);
+
+                        if (type === 'employee' && item.role_name) {
+                            var roleEl = document.createElement('span');
+                            roleEl.className = 'block text-[11px] text-gray-400 truncate';
+                            roleEl.textContent = item.role_name;
+                            textWrap.appendChild(roleEl);
+                        }
+
+                        row.appendChild(textWrap);
+
+                        var itemIndex = currentItems.length;
+                        row.addEventListener('click', function () {
+                            selectMention(currentItems[itemIndex]);
+                        });
+
+                        dropdown.appendChild(row);
+                        currentItems.push({ type: type, id: item.id, name: item.name });
+                    });
+                }
+
+                addGroup('Employees', employees, 'employee');
+                addGroup('Roles', roles, 'role');
+
+                if (!currentItems.length) {
+                    var empty = document.createElement('div');
+                    empty.className = 'px-3 py-3 text-xs text-gray-400 text-center';
+                    empty.textContent = 'Tidak ditemukan';
+                    dropdown.appendChild(empty);
+                }
+
+                activeIndex = -1;
+                dropdown.classList.remove('hidden');
+            }
+
+            function fetchMentionable(query) {
+                var token = ++fetchToken;
+
+                fetch(mentionableUrl + '?q=' + encodeURIComponent(query), { headers: { 'Accept': 'application/json' } })
+                    .then(function (res) { return res.ok ? res.json() : null; })
+                    .then(function (data) {
+                        if (token !== fetchToken) return;
+                        if (!data || !data.success || !detectMentionTrigger()) { closeDropdown(); return; }
+
+                        var employees = (data.data && data.data.employees) || [];
+                        var roles = (data.data && data.data.roles) || [];
+                        renderDropdown(employees, roles);
+                    })
+                    .catch(function () { closeDropdown(); });
+            }
+
+            function selectMention(item) {
+                if (!item || mentionStart === -1) return;
+
+                var cursor = textarea.selectionStart;
+                var value = textarea.value;
+                var insertText = '@' + item.name + ' ';
+                var newValue = value.slice(0, mentionStart) + insertText + value.slice(cursor);
+
+                textarea.value = newValue;
+                var newCursor = mentionStart + insertText.length;
+                textarea.setSelectionRange(newCursor, newCursor);
+                textarea.focus();
+                textarea.dispatchEvent(new Event('input'));
+
+                pendingMentions.push({ type: item.type, id: item.id, text: '@' + item.name });
+
+                closeDropdown();
+            }
+
+            textarea.addEventListener('input', function () {
+                var trigger = detectMentionTrigger();
+                if (!trigger) { closeDropdown(); return; }
+
+                mentionStart = trigger.start;
+
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function () {
+                    fetchMentionable(trigger.query);
+                }, 300);
+            });
+
+            textarea.addEventListener('keydown', function (event) {
+                if (dropdown.classList.contains('hidden') || !currentItems.length) return;
+
+                if (event.key === 'ArrowDown') {
+                    event.preventDefault();
+                    activeIndex = Math.min(activeIndex + 1, currentItems.length - 1);
+                    highlightActive();
+                } else if (event.key === 'ArrowUp') {
+                    event.preventDefault();
+                    activeIndex = Math.max(activeIndex - 1, 0);
+                    highlightActive();
+                } else if (event.key === 'Enter' || event.key === 'Tab') {
+                    if (activeIndex >= 0) {
+                        event.preventDefault();
+                        selectMention(currentItems[activeIndex]);
+                    }
+                } else if (event.key === 'Escape') {
+                    closeDropdown();
+                }
+            });
+
+            document.addEventListener('click', function (event) {
+                if (dropdown.contains(event.target) || event.target === textarea) return;
+                closeDropdown();
+            });
+
+            if (noteToggle) {
+                noteToggle.addEventListener('change', function () {
+                    if (!noteToggle.checked) {
+                        pendingMentions = [];
+                        closeDropdown();
+                    }
+                });
+            }
+
+            form.addEventListener('submit', function () {
+                form.querySelectorAll('input[data-mention-field]').forEach(function (el) { el.remove(); });
+
+                var messageTypeInput = document.getElementById('message_type');
+                if (!messageTypeInput || messageTypeInput.value !== 'internal_note') return;
+
+                var value = textarea.value;
+                var validMentions = pendingMentions.filter(function (mention) {
+                    return value.indexOf(mention.text) !== -1;
+                });
+
+                validMentions.forEach(function (mention) {
+                    var input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.setAttribute('data-mention-field', '1');
+                    input.name = (mention.type === 'role' ? 'mentioned_role_ids' : 'mentioned_employee_ids') + '[]';
+                    input.value = mention.id;
+                    form.appendChild(input);
+                });
+            });
         })();
 
         (function () {

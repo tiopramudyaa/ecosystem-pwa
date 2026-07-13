@@ -165,6 +165,10 @@ class TicketController extends Controller
             'to_emails.*' => ['string'],
             'cc_emails' => ['nullable', 'array'],
             'cc_emails.*' => ['string'],
+            'mentioned_employee_ids' => ['nullable', 'array'],
+            'mentioned_employee_ids.*' => ['integer'],
+            'mentioned_role_ids' => ['nullable', 'array'],
+            'mentioned_role_ids.*' => ['integer'],
         ]);
 
         $isReply = ($validated['message_type'] ?? 'reply') !== 'internal_note';
@@ -197,6 +201,14 @@ class TicketController extends Controller
             $payload['cc_emails'] = $validated['cc_emails'] ?? [];
         }
 
+        // Mentions are only meaningful for internal notes — the Lite API ignores
+        // them for reply, but we still avoid sending customer-facing payloads
+        // with employee/role ids attached.
+        if (! $isReply) {
+            $payload['mentioned_employee_ids'] = $validated['mentioned_employee_ids'] ?? [];
+            $payload['mentioned_role_ids'] = $validated['mentioned_role_ids'] ?? [];
+        }
+
         $response = $this->liteApi->post("/tickets/{$id}/messages", $payload);
 
         if ($this->handleUnauthorized($response)) {
@@ -219,6 +231,19 @@ class TicketController extends Controller
         }
 
         return back()->with('status', 'Pesan berhasil dikirim.');
+    }
+
+    public function mentionable(Request $request)
+    {
+        $response = $this->liteApi->get('/employees/mentionable', [
+            'q' => $request->query('q', ''),
+        ]);
+
+        if ($this->handleUnauthorized($response)) {
+            return response()->json(['success' => false], 401);
+        }
+
+        return response()->json($response->json(), $response->status());
     }
 
     public function updateNote(Request $request, int $id, int $messageId)

@@ -39,6 +39,33 @@
     $replyToId = $message['reply_to_id'] ?? null;
     $replyToSenderName = is_array($replyToPreview) ? ($replyToPreview['sender_name'] ?? 'Pesan') : null;
     $replyToBody = is_array($replyToPreview) ? trim((string) ($replyToPreview['message_body'] ?? '')) : '';
+
+    $mentions = $message['mentions'] ?? [];
+    $renderMessageBody = function ($text, $mentions, $currentUserId) {
+        $escaped = e($text);
+        if (empty($mentions)) {
+            return $escaped;
+        }
+
+        usort($mentions, fn ($a, $b) => mb_strlen($b['name'] ?? '') <=> mb_strlen($a['name'] ?? ''));
+
+        foreach ($mentions as $mention) {
+            $name = trim((string) ($mention['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+
+            $needle = e('@' . $name);
+            $isSelf = $currentUserId !== null
+                && isset($mention['employee_id'])
+                && (string) $mention['employee_id'] === (string) $currentUserId;
+            $class = $isSelf ? 'mention-highlight mention-highlight-self' : 'mention-highlight';
+
+            $escaped = str_replace($needle, '<span class="' . $class . '">' . $needle . '</span>', $escaped);
+        }
+
+        return $escaped;
+    };
 @endphp
 <div id="msg-{{ $message['id'] ?? '' }}"
      class="message flex items-end gap-2 py-1 min-w-0 max-w-full {{ $isOwn ? 'justify-end' : 'justify-start' }}"
@@ -92,7 +119,7 @@
         @if ($isDeletedNote)
             <div class="note-body text-sm italic text-gray-400">Catatan ini telah dihapus.</div>
         @else
-            <div class="note-body text-sm whitespace-pre-wrap break-words">{{ $messageBody }}</div>
+            <div class="note-body text-sm whitespace-pre-wrap break-words">{!! $renderMessageBody($messageBody, $mentions, $currentUserId) !!}</div>
         @endif
 
         @if ($isNote && $editedAt && !$isDeletedNote)

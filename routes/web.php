@@ -23,6 +23,7 @@ Route::middleware('lite_api.auth')->group(function () {
     Route::patch('/tickets/{id}/status', [TicketController::class, 'updateStatus'])->whereNumber('id')->name('tickets.status');
     Route::post('/tickets/{id}/messages', [TicketController::class, 'storeMessage'])->whereNumber('id')->name('tickets.messages.store');
     Route::get('/tickets/{id}/messages/poll', [TicketController::class, 'pollMessages'])->whereNumber('id')->name('tickets.messages.poll');
+    Route::get('/employees/mentionable', [TicketController::class, 'mentionable'])->name('employees.mentionable');
     Route::post('/tickets/{id}/messages/{messageId}/internal-note', [TicketController::class, 'updateNote'])->whereNumber(['id', 'messageId'])->name('tickets.messages.note.update');
     Route::delete('/tickets/{id}/messages/{messageId}/internal-note', [TicketController::class, 'destroyNote'])->whereNumber(['id', 'messageId'])->name('tickets.messages.note.destroy');
     Route::get('/tickets/attachments/{attachmentId}', [TicketController::class, 'attachment'])->whereNumber('attachmentId')->name('tickets.attachments.show');
