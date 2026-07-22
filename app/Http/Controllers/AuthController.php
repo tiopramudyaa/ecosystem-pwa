@@ -29,12 +29,12 @@ class AuthController extends Controller
 
         if (! $response->successful() || ! ($body['success'] ?? false)) {
             return back()
-                ->withErrors(['email' => $body['message'] ?? 'Login gagal.'])
+                ->withErrors(['email' => $body['message'] ?? 'Login failed.'])
                 ->onlyInput('email');
         }
 
         if ($body['require_password_change'] ?? false) {
-            return back()->with('status', $body['message'] ?? 'Silakan cek email untuk setup password.');
+            return back()->with('status', $body['message'] ?? 'Please check your email to set up your password.');
         }
 
         Session::put('lite_api_token', $body['data']['token']);
@@ -60,7 +60,7 @@ class AuthController extends Controller
             Session::forget(['lite_api_token', 'lite_api_user']);
 
             return redirect()->route('login')->withErrors([
-                'email' => $response->json('message', 'Sesi berakhir, silakan login kembali.'),
+                'email' => $response->json('message', 'Your session has expired, please log in again.'),
             ]);
         }
 

@@ -99,20 +99,20 @@
 
 @section('content')
     <a href="{{ route('tickets.index') }}" class="inline-flex items-center gap-1.5 text-sm primary-text hover:underline mb-4">
-        <i class="fas fa-arrow-left text-xs"></i> Daftar Tiket
+        <i class="fas fa-arrow-left text-xs"></i> Ticket List
     </a>
 
-    {{-- Desktop: detail selalu tampil inline --}}
+    {{-- Desktop: detail is always shown inline --}}
     <div class="hidden lg:block bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
         @include('tickets.partials.detail-card', ['ticket' => $ticket])
     </div>
 
-    {{-- Mobile: detail muncul sebagai modal saat nomor tiket di header diklik --}}
+    {{-- Mobile: detail appears as a modal when the ticket number in the header is clicked --}}
     <div id="ticket-detail-modal" class="hidden lg:hidden fixed inset-0 z-50">
         <div class="absolute inset-0 bg-black/50" onclick="closeTicketDetail()"></div>
         <div class="absolute inset-x-0 bottom-0 max-h-[85vh] overflow-y-auto bg-white rounded-t-2xl shadow-xl p-5">
             <div class="flex items-center justify-between mb-3">
-                <span class="text-sm font-semibold text-gray-700">Detail Tiket</span>
+                <span class="text-sm font-semibold text-gray-700">Ticket Detail</span>
                 <button type="button" onclick="closeTicketDetail()" class="icon-btn">
                     <i class="fas fa-times"></i>
                 </button>
@@ -121,7 +121,7 @@
         </div>
     </div>
 
-    <h2 class="text-base font-semibold text-gray-900 mb-3">Ubah Status</h2>
+    <h2 class="text-base font-semibold text-gray-900 mb-3">Change Status</h2>
     <form method="POST" action="{{ route('tickets.status', $ticket['ticket_id']) }}" class="flex gap-2 mb-6">
         @csrf
         @method('PATCH')
@@ -133,7 +133,7 @@
         <button type="submit" class="px-4 py-2 rounded-lg primary-gradient text-white text-sm font-medium">Update Status</button>
     </form>
 
-    <h2 class="text-base font-semibold text-gray-900 mb-3">Pesan</h2>
+    <h2 class="text-base font-semibold text-gray-900 mb-3">Messages</h2>
 
     @php
         $currentUserId = session('lite_api_user')['id'] ?? null;
@@ -172,7 +172,7 @@
                 'lastSenderState' => $lastSenderState,
             ])
         @empty
-            <p class="text-sm text-gray-500 bg-white rounded-xl border border-gray-200 p-4 text-center">Belum ada pesan.</p>
+            <p class="text-sm text-gray-500 bg-white rounded-xl border border-gray-200 p-4 text-center">No messages yet.</p>
         @endforelse
     </div>
 
@@ -194,30 +194,30 @@
     @endphp
 
     <form method="POST" action="{{ route('tickets.messages.store', $ticket['ticket_id']) }}"
-          class="chat-input-bar relative bg-white border border-gray-200 shadow-lg lg:shadow-sm rounded-2xl lg:rounded-xl px-3 py-2.5 flex items-end gap-2 mx-4 lg:mx-0 has-[#note\_toggle:checked]:bg-amber-50 has-[#note\_toggle:checked]:border-amber-300 transition-colors"
+          class="chat-input-bar relative bg-white border border-gray-200 shadow-lg lg:shadow-sm rounded-2xl lg:rounded-xl px-3 py-2.5 flex items-end gap-2 mx-4 lg:mx-0 has-[#note\_toggle:checked]:bg-yellow-50 has-[#note\_toggle:checked]:border-yellow-300 transition-colors"
           id="chat-form">
         @csrf
 
         <div id="composer-options" class="hidden absolute left-0 right-0 bottom-full mb-2 z-10 bg-white border border-gray-200 rounded-xl shadow-lg p-3 space-y-3 text-sm max-h-[70vh] overflow-y-auto">
             <div class="reply-only-option">
-                <label class="block text-xs font-medium text-gray-600 mb-1">Penerima Email (To)</label>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Email Recipients (To)</label>
                 <div id="to-chips" class="flex flex-wrap gap-1.5 mb-1.5"></div>
                 <div class="flex gap-1.5">
-                    <input type="email" id="to-email-input" placeholder="Tambah email To lalu Enter"
+                    <input type="email" id="to-email-input" placeholder="Add a To email then press Enter"
                            class="primary-focus flex-1 bg-gray-50 text-xs rounded-lg border border-gray-200 px-2.5 py-1.5">
-                    <button type="button" id="to-email-add" class="px-2.5 py-1.5 rounded-lg bg-gray-100 text-xs text-gray-600">Tambah</button>
+                    <button type="button" id="to-email-add" class="px-2.5 py-1.5 rounded-lg bg-gray-100 text-xs text-gray-600">Add</button>
                 </div>
                 <div id="to-emails-fields"></div>
                 <input type="hidden" name="to_emails_touched" id="to_emails_touched" value="0">
             </div>
 
             <div class="reply-only-option">
-                <label class="block text-xs font-medium text-gray-600 mb-1">Penerima Email (CC)</label>
+                <label class="block text-xs font-medium text-gray-600 mb-1">Email Recipients (CC)</label>
                 <div id="cc-chips" class="flex flex-wrap gap-1.5 mb-1.5"></div>
                 <div class="flex gap-1.5">
-                    <input type="email" id="cc-email-input" placeholder="Tambah email CC lalu Enter"
+                    <input type="email" id="cc-email-input" placeholder="Add a CC email then press Enter"
                            class="primary-focus flex-1 bg-gray-50 text-xs rounded-lg border border-gray-200 px-2.5 py-1.5">
-                    <button type="button" id="cc-email-add" class="px-2.5 py-1.5 rounded-lg bg-gray-100 text-xs text-gray-600">Tambah</button>
+                    <button type="button" id="cc-email-add" class="px-2.5 py-1.5 rounded-lg bg-gray-100 text-xs text-gray-600">Add</button>
                 </div>
                 <div id="cc-emails-fields"></div>
                 <input type="hidden" name="cc_emails_touched" id="cc_emails_touched" value="0">
@@ -229,7 +229,7 @@
 
         <div id="reply-quote-banner" class="hidden absolute left-0 right-0 bottom-full mb-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 flex items-start gap-2">
             <div class="flex-1 min-w-0">
-                <div class="text-[11px] font-semibold text-amber-800">Membalas <span id="reply-quote-sender"></span></div>
+                <div class="text-[11px] font-semibold text-amber-800">Replying to <span id="reply-quote-sender"></span></div>
                 <div id="reply-quote-text" class="text-xs text-amber-700 truncate"></div>
             </div>
             <button type="button" id="reply-quote-cancel" class="shrink-0 w-6 h-6 rounded-full text-amber-600 hover:bg-amber-100 flex items-center justify-center">
@@ -241,18 +241,18 @@
 
         <input type="checkbox" id="note_toggle" class="peer sr-only" onchange="document.getElementById('message_type').value = this.checked ? 'internal_note' : 'reply'; window.toggleComposerOptionsForNote && window.toggleComposerOptionsForNote(this.checked);">
         <label for="note_toggle"
-               title="Tandai sebagai Internal Note"
-               class="shrink-0 w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 cursor-pointer peer-checked:bg-amber-100 peer-checked:border-amber-300 peer-checked:text-amber-700 transition-colors">
-            <i class="fas fa-lock text-sm"></i>
+               title="Mark as Internal Note"
+               class="shrink-0 w-9 h-9 rounded-full border border-yellow-300 bg-yellow-50 flex items-center justify-center text-yellow-600 cursor-pointer peer-checked:bg-yellow-100 peer-checked:border-yellow-400 peer-checked:text-yellow-700 transition-colors">
+            <i class="fas fa-pen text-sm"></i>
         </label>
 
-        <button type="button" id="options-toggle" title="Opsi tambahan (status &amp; penerima email)"
+        <button type="button" id="options-toggle" title="Additional options (status &amp; email recipients)"
                 class="shrink-0 w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors">
-            <i class="fas fa-sliders text-sm"></i>
+            <i class="fas fa-envelope text-sm"></i>
         </button>
 
-        <textarea name="message" id="chat-textarea" rows="1" required placeholder="Tulis pesan..."
-                  class="primary-focus bg-gray-50 text-sm flex-1 rounded-2xl border border-gray-200 px-4 py-2 peer-checked:bg-amber-100 peer-checked:border-amber-200 transition-colors"></textarea>
+        <textarea name="message" id="chat-textarea" rows="1" required placeholder="Write a message..."
+                  class="primary-focus bg-gray-50 text-sm flex-1 rounded-2xl border border-gray-200 px-4 py-2 peer-checked:bg-yellow-100 peer-checked:border-yellow-200 transition-colors"></textarea>
 
         <button type="submit" class="shrink-0 w-10 h-10 rounded-full primary-gradient text-white flex items-center justify-center">
             <i class="fas fa-paper-plane text-sm"></i>
@@ -263,7 +263,7 @@
                 <div class="flex items-start justify-between mb-1">
                     <div>
                         <h3 class="text-lg font-bold text-gray-900">Send &amp; Set Status</h3>
-                        <p class="text-sm text-gray-400">Pilih status setelah reply dikirim</p>
+                        <p class="text-sm text-gray-400">Choose a status after the reply is sent</p>
                     </div>
                     <button type="button" id="status-modal-cancel" class="shrink-0 w-9 h-9 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200">
                         <i class="fas fa-times"></i>
@@ -276,11 +276,11 @@
 
                 @php
                     $statusModalOptions = [
-                        'inprocess' => ['label' => 'Inprocess', 'desc' => 'Helpdesk sedang mengerjakan', 'icon' => 'fa-bolt', 'theme' => 'amber'],
-                        'waiting_on_customer' => ['label' => 'Waiting on Customer', 'desc' => 'Menunggu balasan customer', 'icon' => 'fa-user', 'theme' => 'yellow'],
-                        'waiting_to_confirmation' => ['label' => 'Waiting to Confirmation', 'desc' => 'Menunggu konfirmasi customer', 'icon' => 'fa-circle-check', 'theme' => 'teal'],
-                        'waiting_on_3rd_party' => ['label' => 'Waiting on 3rd Party', 'desc' => 'Diteruskan ke SAP / pihak ketiga', 'icon' => 'fa-people-arrows', 'theme' => 'indigo'],
-                        'hold' => ['label' => 'Hold', 'desc' => 'Ticket ditahan sementara', 'icon' => 'fa-circle-pause', 'theme' => 'orange'],
+                        'inprocess' => ['label' => 'Inprocess', 'desc' => 'Helpdesk is working on it', 'icon' => 'fa-bolt', 'theme' => 'amber'],
+                        'waiting_on_customer' => ['label' => 'Waiting on Customer', 'desc' => 'Waiting for customer reply', 'icon' => 'fa-user', 'theme' => 'yellow'],
+                        'waiting_to_confirmation' => ['label' => 'Waiting to Confirmation', 'desc' => 'Waiting for customer confirmation', 'icon' => 'fa-circle-check', 'theme' => 'teal'],
+                        'waiting_on_3rd_party' => ['label' => 'Waiting on 3rd Party', 'desc' => 'Forwarded to SAP / third party', 'icon' => 'fa-people-arrows', 'theme' => 'indigo'],
+                        'hold' => ['label' => 'Hold', 'desc' => 'Ticket temporarily on hold', 'icon' => 'fa-circle-pause', 'theme' => 'orange'],
                     ];
                     $statusModalThemes = [
                         'amber' => 'bg-amber-50 border-amber-200 hover:border-amber-300 [&_.status-icon]:bg-amber-400 [&_.status-title]:text-amber-900 [&_.status-desc]:text-amber-600 [&_.status-chevron]:text-amber-400',
@@ -316,8 +316,8 @@
             <div class="bg-white rounded-3xl shadow-xl w-full max-w-sm p-5">
                 <div class="flex items-start justify-between mb-1">
                     <div>
-                        <h3 class="text-lg font-bold text-gray-900">Konfirmasi Kirim</h3>
-                        <p class="text-sm text-gray-400">Periksa kembali sebelum dikirim</p>
+                        <h3 class="text-lg font-bold text-gray-900">Confirm Send</h3>
+                        <p class="text-sm text-gray-400">Review before sending</p>
                     </div>
                     <button type="button" id="confirm-modal-close" class="shrink-0 w-9 h-9 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200">
                         <i class="fas fa-times"></i>
@@ -328,29 +328,29 @@
 
                 <div class="space-y-3 max-h-[55vh] overflow-y-auto text-sm">
                     <div>
-                        <div class="text-xs font-medium text-gray-400 mb-1">Isi Pesan</div>
+                        <div class="text-xs font-medium text-gray-400 mb-1">Message Content</div>
                         <div id="confirm-message" class="bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-gray-800 whitespace-pre-wrap break-words"></div>
                     </div>
 
                     <div id="confirm-to-wrap">
-                        <div class="text-xs font-medium text-gray-400 mb-1">Kepada (To)</div>
+                        <div class="text-xs font-medium text-gray-400 mb-1">To</div>
                         <div id="confirm-to" class="flex flex-wrap gap-1"></div>
                     </div>
 
                     <div id="confirm-cc-wrap">
-                        <div class="text-xs font-medium text-gray-400 mb-1">Tembusan (CC)</div>
+                        <div class="text-xs font-medium text-gray-400 mb-1">CC</div>
                         <div id="confirm-cc" class="flex flex-wrap gap-1"></div>
                     </div>
 
                     <div>
-                        <div class="text-xs font-medium text-gray-400 mb-1">Status Tiket</div>
+                        <div class="text-xs font-medium text-gray-400 mb-1">Ticket Status</div>
                         <div id="confirm-status" class="text-gray-800 font-medium"></div>
                     </div>
                 </div>
 
                 <div class="flex gap-2 mt-4">
-                    <button type="button" id="confirm-modal-back" class="flex-1 px-4 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-sm font-medium">Kembali</button>
-                    <button type="button" id="confirm-modal-send" class="flex-1 px-4 py-2.5 rounded-xl primary-gradient text-white text-sm font-semibold">Kirim Sekarang</button>
+                    <button type="button" id="confirm-modal-back" class="flex-1 px-4 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-sm font-medium">Back</button>
+                    <button type="button" id="confirm-modal-send" class="flex-1 px-4 py-2.5 rounded-xl primary-gradient text-white text-sm font-semibold">Send Now</button>
                 </div>
             </div>
         </div>
@@ -360,8 +360,8 @@
         <div class="bg-white rounded-3xl shadow-xl w-full max-w-sm p-5">
             <div class="flex items-start justify-between mb-1">
                 <div>
-                    <h3 class="text-lg font-bold text-gray-900">Edit Catatan Internal</h3>
-                    <p class="text-sm text-gray-400">Ubah isi catatan lalu simpan</p>
+                    <h3 class="text-lg font-bold text-gray-900">Edit Internal Note</h3>
+                    <p class="text-sm text-gray-400">Edit the note content then save</p>
                 </div>
                 <button type="button" id="note-edit-modal-close" class="shrink-0 w-9 h-9 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center hover:bg-gray-200">
                     <i class="fas fa-times"></i>
@@ -374,8 +374,8 @@
                       class="primary-focus bg-gray-50 text-sm w-full rounded-xl border border-gray-200 px-3 py-2"></textarea>
 
             <div class="flex gap-2 mt-4">
-                <button type="button" id="note-edit-modal-cancel" class="flex-1 px-4 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-sm font-medium">Batal</button>
-                <button type="button" id="note-edit-modal-save" class="flex-1 px-4 py-2.5 rounded-xl primary-gradient text-white text-sm font-semibold">Simpan</button>
+                <button type="button" id="note-edit-modal-cancel" class="flex-1 px-4 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-sm font-medium">Cancel</button>
+                <button type="button" id="note-edit-modal-save" class="flex-1 px-4 py-2.5 rounded-xl primary-gradient text-white text-sm font-semibold">Save</button>
             </div>
         </div>
     </div>
@@ -387,14 +387,14 @@
                     <i class="fas fa-trash"></i>
                 </span>
                 <div class="pt-0.5">
-                    <h3 class="text-lg font-bold text-gray-900">Hapus Catatan?</h3>
-                    <p class="text-sm text-gray-400">Catatan internal ini akan ditandai terhapus dan tidak bisa dikembalikan.</p>
+                    <h3 class="text-lg font-bold text-gray-900">Delete Note?</h3>
+                    <p class="text-sm text-gray-400">This internal note will be marked as deleted and cannot be restored.</p>
                 </div>
             </div>
 
             <div class="flex gap-2 mt-4">
-                <button type="button" id="note-delete-modal-cancel" class="flex-1 px-4 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-sm font-medium">Batal</button>
-                <button type="button" id="note-delete-modal-confirm" class="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold">Hapus</button>
+                <button type="button" id="note-delete-modal-cancel" class="flex-1 px-4 py-2.5 rounded-xl bg-gray-100 text-gray-600 text-sm font-medium">Cancel</button>
+                <button type="button" id="note-delete-modal-confirm" class="flex-1 px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold">Delete</button>
             </div>
         </div>
     </div>
@@ -563,7 +563,7 @@
                 if (!inputs.length) {
                     var empty = document.createElement('span');
                     empty.className = 'text-xs text-gray-400 italic';
-                    empty.textContent = 'Tidak ada';
+                    empty.textContent = 'None';
                     target.appendChild(empty);
                     return;
                 }
@@ -590,7 +590,7 @@
                     renderEmailChips(confirmCc, document.getElementById('cc-emails-fields'));
                 }
 
-                confirmStatus.textContent = statusLabel || 'Tidak diubah';
+                confirmStatus.textContent = statusLabel || 'Unchanged';
 
                 closeStatusModal();
                 confirmModal.classList.remove('hidden');
@@ -621,16 +621,12 @@
                 openStatusModal();
             });
 
-            statusCancelBtn.addEventListener('click', function () {
-                openConfirmModal('', '');
-            });
+            statusCancelBtn.addEventListener('click', closeStatusModal);
 
-            statusSkipBtn.addEventListener('click', function () {
-                openConfirmModal('', '');
-            });
+            statusSkipBtn.addEventListener('click', closeStatusModal);
 
             statusModal.addEventListener('click', function (event) {
-                if (event.target === statusModal) openConfirmModal('', '');
+                if (event.target === statusModal) closeStatusModal();
             });
 
             confirmBackBtn.addEventListener('click', function () {
@@ -671,6 +667,34 @@
         })();
 
         (function () {
+            var noteToggle = document.getElementById('note_toggle');
+            var noteLabel = document.querySelector('label[for="note_toggle"]');
+            var textarea = document.getElementById('chat-textarea');
+            var form = document.getElementById('chat-form');
+            var messageTypeInput = document.getElementById('message_type');
+
+            if (!noteToggle || !noteLabel || !textarea || !form || !messageTypeInput) return;
+
+            function isMobile() {
+                return window.innerWidth < 1024;
+            }
+
+            noteLabel.addEventListener('click', function (event) {
+                if (!isMobile() || noteToggle.disabled) return;
+
+                event.preventDefault();
+
+                if (textarea.value.trim() === '') {
+                    textarea.focus();
+                    return;
+                }
+
+                messageTypeInput.value = 'internal_note';
+                form.requestSubmit();
+            });
+        })();
+
+        (function () {
             var emailChipEditor = function (config) {
                 var list = config.initial.slice();
                 var touched = false;
@@ -687,7 +711,7 @@
                     if (list.length === 0) {
                         var empty = document.createElement('span');
                         empty.className = 'text-[11px] text-gray-400 italic';
-                        empty.textContent = 'Belum ada penerima';
+                        empty.textContent = 'No recipients yet';
                         chipsEl.appendChild(empty);
                     }
 
@@ -868,7 +892,7 @@
                     body: JSON.stringify({ message: newMessage }),
                 }).then(function (result) {
                     if (!result.ok || !result.body.success) {
-                        showToast(result.body.message || 'Gagal mengubah catatan.', true);
+                        showToast(result.body.message || 'Failed to update the note.', true);
                         return;
                     }
 
@@ -885,13 +909,13 @@
                             label.className = 'note-edited-label text-[10px] italic text-amber-600';
                             bodyEl.parentNode.insertBefore(label, bodyEl.nextSibling);
                         }
-                        if (label) label.textContent = '(diedit)';
+                        if (label) label.textContent = '(edited)';
                     }
 
-                    showToast('Catatan berhasil diubah.', false);
+                    showToast('Note updated successfully.', false);
                     closeEditModal();
                 }).catch(function () {
-                    showToast('Gagal menghubungi server.', true);
+                    showToast('Failed to contact the server.', true);
                 }).finally(function () {
                     setButtonLoading(editSaveBtn, editSaveBtnHtml, false);
                 });
@@ -908,13 +932,13 @@
                     },
                 }).then(function (result) {
                     if (!result.ok || !result.body.success) {
-                        showToast(result.body.message || 'Gagal menghapus catatan.', true);
+                        showToast(result.body.message || 'Failed to delete the note.', true);
                         return;
                     }
 
                     var bodyEl = messageEl.querySelector('.note-body');
                     if (bodyEl) {
-                        bodyEl.textContent = 'Catatan ini telah dihapus.';
+                        bodyEl.textContent = 'This note has been deleted.';
                         bodyEl.classList.add('italic', 'text-gray-400');
                     }
 
@@ -927,9 +951,9 @@
                     var deleteBtn = messageEl.querySelector('.note-delete-btn');
                     if (deleteBtn) deleteBtn.remove();
 
-                    showToast('Catatan berhasil dihapus.', false);
+                    showToast('Note deleted successfully.', false);
                 }).catch(function () {
-                    showToast('Gagal menghubungi server.', true);
+                    showToast('Failed to contact the server.', true);
                 });
             }
 
@@ -1029,7 +1053,7 @@
 
             window.startNoteReply = function (messageEl) {
                 var messageId = messageEl.getAttribute('data-message-id');
-                var senderName = messageEl.getAttribute('data-sender-name') || 'Pesan';
+                var senderName = messageEl.getAttribute('data-sender-name') || 'Message';
                 var rawMessage = messageEl.getAttribute('data-raw-message') || '';
 
                 replyToInput.value = messageId || '';
@@ -1196,7 +1220,7 @@
                 if (!currentItems.length) {
                     var empty = document.createElement('div');
                     empty.className = 'px-3 py-3 text-xs text-gray-400 text-center';
-                    empty.textContent = 'Tidak ditemukan';
+                    empty.textContent = 'No results found';
                     dropdown.appendChild(empty);
                 }
 

@@ -24,7 +24,7 @@ class NotificationController extends Controller
             }
 
             return redirect()->route('login')->withErrors([
-                'email' => 'Sesi berakhir, silakan login kembali.',
+                'email' => 'Your session has expired, please log in again.',
             ]);
         }
 
@@ -34,7 +34,7 @@ class NotificationController extends Controller
             }
 
             return back()->withErrors([
-                'notifications' => $response->json('message', 'Gagal memuat notifikasi.'),
+                'notifications' => $response->json('message', 'Failed to load notifications.'),
             ]);
         }
 
@@ -71,13 +71,13 @@ class NotificationController extends Controller
 
         if ($this->handleUnauthorized($response)) {
             return redirect()->route('login')->withErrors([
-                'email' => 'Sesi berakhir, silakan login kembali.',
+                'email' => 'Your session has expired, please log in again.',
             ]);
         }
 
         if (! $response->successful()) {
             return back()->withErrors([
-                'notifications' => $response->json('message', 'Gagal menandai notifikasi.'),
+                'notifications' => $response->json('message', 'Failed to mark notification as read.'),
             ]);
         }
 
@@ -90,17 +90,17 @@ class NotificationController extends Controller
 
         if ($this->handleUnauthorized($response)) {
             return redirect()->route('login')->withErrors([
-                'email' => 'Sesi berakhir, silakan login kembali.',
+                'email' => 'Your session has expired, please log in again.',
             ]);
         }
 
         if (! $response->successful()) {
             return back()->withErrors([
-                'notifications' => $response->json('message', 'Gagal menandai semua notifikasi.'),
+                'notifications' => $response->json('message', 'Failed to mark all notifications as read.'),
             ]);
         }
 
-        return back()->with('status', 'Semua notifikasi ditandai sudah dibaca.');
+        return back()->with('status', 'All notifications marked as read.');
     }
 
     public function destroy(Request $request, int $id)
@@ -109,17 +109,17 @@ class NotificationController extends Controller
 
         if ($this->handleUnauthorized($response)) {
             return redirect()->route('login')->withErrors([
-                'email' => 'Sesi berakhir, silakan login kembali.',
+                'email' => 'Your session has expired, please log in again.',
             ]);
         }
 
         if (! $response->successful()) {
             return back()->withErrors([
-                'notifications' => $response->json('message', 'Gagal menghapus notifikasi.'),
+                'notifications' => $response->json('message', 'Failed to delete notification.'),
             ]);
         }
 
-        return back()->with('status', 'Notifikasi dihapus.');
+        return back()->with('status', 'Notification deleted.');
     }
 
     public function bulkDelete(Request $request)
@@ -128,17 +128,17 @@ class NotificationController extends Controller
 
         if ($this->handleUnauthorized($response)) {
             return redirect()->route('login')->withErrors([
-                'email' => 'Sesi berakhir, silakan login kembali.',
+                'email' => 'Your session has expired, please log in again.',
             ]);
         }
 
         if (! $response->successful()) {
             return back()->withErrors([
-                'notifications' => $response->json('message', 'Gagal menghapus notifikasi yang sudah dibaca.'),
+                'notifications' => $response->json('message', 'Failed to delete read notifications.'),
             ]);
         }
 
-        return back()->with('status', 'Notifikasi yang sudah dibaca berhasil dihapus.');
+        return back()->with('status', 'Read notifications deleted successfully.');
     }
 
     public function pushSubscribe(Request $request)

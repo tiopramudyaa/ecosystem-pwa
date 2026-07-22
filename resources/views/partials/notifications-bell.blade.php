@@ -1,4 +1,4 @@
-<a href="{{ route('notifications.index') }}" id="notif-bell-link" class="relative text-gray-600 hover:text-gray-900" title="Notifikasi">
+<a href="{{ route('notifications.index') }}" id="notif-bell-link" class="relative text-gray-600 hover:text-gray-900" title="Notifications">
     <i class="fas fa-bell text-lg"></i>
     <span id="notif-badge" class="hidden absolute -top-1.5 -right-2 bg-red-600 text-white text-[10px] font-bold leading-none rounded-full px-1.5 py-0.5"></span>
 </a>
@@ -26,7 +26,7 @@
         function showSystemNotification(notification) {
             if (!('serviceWorker' in navigator) || Notification.permission !== 'granted') return;
 
-            var title = notification.ticket_number ? notification.ticket_number : 'Notifikasi Baru';
+            var title = notification.ticket_number ? notification.ticket_number : 'New Notification';
             var url = notification.ticket_id
                 ? '{{ url('/tickets') }}/' + notification.ticket_id + (notification.message_id ? ('?highlight_message_id=' + notification.message_id) : '')
                 : listUrl;

@@ -16,7 +16,7 @@
                 @forelse ($profile['roles'] ?? [] as $role)
                     <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-medium border bg-red-50 text-red-700 border-red-200">{{ $role['name'] ?? '-' }}</span>
                 @empty
-                    <span class="text-xs text-gray-400">Tidak ada role</span>
+                    <span class="text-xs text-gray-400">No role</span>
                 @endforelse
             </div>
         </div>
@@ -25,7 +25,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
             <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <i class="fas fa-id-card primary-text"></i> Data Pegawai
+                <i class="fas fa-id-card primary-text"></i> Employee Data
             </h3>
             <dl class="space-y-3 text-sm">
                 <div class="flex justify-between gap-3"><dt class="text-gray-500">ECI</dt><dd class="text-gray-800 text-right">{{ $profile['eci'] ?? '-' }}</dd></div>
@@ -39,7 +39,7 @@
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
             <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <i class="fas fa-address-book primary-text"></i> Kontak
+                <i class="fas fa-address-book primary-text"></i> Contact
             </h3>
             <dl class="space-y-3 text-sm">
                 <div class="flex justify-between gap-3"><dt class="text-gray-500">Email (Work)</dt><dd class="text-gray-800 text-right break-all">{{ $profile['email_work'] ?? '-' }}</dd></div>
@@ -52,14 +52,14 @@
 
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 max-w-md">
         <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-            <i class="fas fa-lock primary-text"></i> Ubah Password
+            <i class="fas fa-lock primary-text"></i> Change Password
         </h3>
         <form method="POST" action="{{ route('profile.change-password') }}" class="space-y-3">
             @csrf
             @method('PATCH')
-            <input type="password" name="password" placeholder="Password baru (min 8 karakter)" required class="primary-focus bg-white text-sm w-full">
-            <input type="password" name="password_confirmation" placeholder="Konfirmasi password baru" required class="primary-focus bg-white text-sm w-full">
-            <button type="submit" class="px-4 py-2 rounded-lg primary-gradient text-white text-sm font-medium">Ubah Password</button>
+            <input type="password" name="password" placeholder="New password (min 8 characters)" required class="primary-focus bg-white text-sm w-full">
+            <input type="password" name="password_confirmation" placeholder="Confirm new password" required class="primary-focus bg-white text-sm w-full">
+            <button type="submit" class="px-4 py-2 rounded-lg primary-gradient text-white text-sm font-medium">Change Password</button>
         </form>
     </div>
 @endsection

@@ -75,7 +75,7 @@
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6 transition-shadow hover:shadow-md">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xs font-semibold text-gray-500 tracking-wide uppercase">Priority Breakdown</h3>
-                <span class="text-xs text-gray-400">{{ $priorityTotal }} tiket</span>
+                <span class="text-xs text-gray-400">{{ $priorityTotal }} tickets</span>
             </div>
 
             <div class="flex w-full h-2.5 rounded-full overflow-hidden bg-gray-100 mb-5">
@@ -139,7 +139,7 @@
                             </div>
                         </a>
                     @empty
-                        <p class="text-sm text-gray-400 text-center py-6">Tidak ada tiket terbaru.</p>
+                        <p class="text-sm text-gray-400 text-center py-6">No recent tickets.</p>
                     @endforelse
                 </div>
             </div>
@@ -203,7 +203,7 @@
                     </span>
                     Urgent Tickets
                 </h3>
-                <span class="text-xs text-gray-400">{{ count($data['urgent_tickets']) }} tiket</span>
+                <span class="text-xs text-gray-400">{{ count($data['urgent_tickets']) }} tickets</span>
             </div>
             <div class="divide-y divide-gray-100">
                 @forelse ($data['urgent_tickets'] as $ticket)
@@ -218,7 +218,7 @@
                         </div>
                     </a>
                 @empty
-                    <p class="text-sm text-gray-400 text-center py-6">Tidak ada tiket urgent.</p>
+                    <p class="text-sm text-gray-400 text-center py-6">No urgent tickets.</p>
                 @endforelse
             </div>
         </div>

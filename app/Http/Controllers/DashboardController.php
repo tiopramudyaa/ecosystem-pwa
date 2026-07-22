@@ -21,12 +21,12 @@ class DashboardController extends Controller
                 Session::forget(['lite_api_token', 'lite_api_user']);
 
                 return redirect()->route('login')->withErrors([
-                    'email' => 'Sesi berakhir, silakan login kembali.',
+                    'email' => 'Your session has expired, please log in again.',
                 ]);
             }
 
             return back()->withErrors([
-                'dashboard' => $response->json('message', 'Gagal memuat dashboard.'),
+                'dashboard' => $response->json('message', 'Failed to load dashboard.'),
             ]);
         }
 

@@ -18,13 +18,13 @@ class ProfileController extends Controller
 
         if ($this->handleUnauthorized($response)) {
             return redirect()->route('login')->withErrors([
-                'email' => 'Sesi berakhir, silakan login kembali.',
+                'email' => 'Your session has expired, please log in again.',
             ]);
         }
 
         if (! $response->successful()) {
             return back()->withErrors([
-                'profile' => $response->json('message', 'Gagal memuat profil.'),
+                'profile' => $response->json('message', 'Failed to load profile.'),
             ]);
         }
 
@@ -44,17 +44,17 @@ class ProfileController extends Controller
 
         if ($this->handleUnauthorized($response)) {
             return redirect()->route('login')->withErrors([
-                'email' => 'Sesi berakhir, silakan login kembali.',
+                'email' => 'Your session has expired, please log in again.',
             ]);
         }
 
         if (! $response->successful()) {
             return back()->withErrors(
-                $response->json('errors') ?? ['password' => $response->json('message', 'Gagal mengubah password.')]
+                $response->json('errors') ?? ['password' => $response->json('message', 'Failed to change password.')]
             );
         }
 
-        return back()->with('status', 'Password berhasil diubah.');
+        return back()->with('status', 'Password changed successfully.');
     }
 
     protected function handleUnauthorized($response): bool

@@ -310,7 +310,7 @@
                 @if (session('status_warning'))
                     <div class="mb-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 text-sm flex items-start gap-2">
                         <i class="fas fa-triangle-exclamation mt-0.5"></i>
-                        <span>Pesan tersimpan, tetapi <strong>tidak terkirim ke email customer</strong>: {{ session('status_warning') }}</span>
+                        <span>Message saved, but <strong>not sent to the customer's email</strong>: {{ session('status_warning') }}</span>
                     </div>
                 @endif
 
@@ -357,11 +357,11 @@
             <div class="mx-auto mb-4 w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center">
                 <i class="fas fa-sign-out-alt text-lg"></i>
             </div>
-            <h2 class="text-base font-semibold text-gray-900 mb-1">Konfirmasi Logout</h2>
-            <p class="text-sm text-gray-500 mb-6">Apakah Anda yakin ingin logout?</p>
+            <h2 class="text-base font-semibold text-gray-900 mb-1">Confirm Logout</h2>
+            <p class="text-sm text-gray-500 mb-6">Are you sure you want to log out?</p>
             <div class="flex gap-3">
                 <button type="button" onclick="closeLogoutModal()" class="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                    Batal
+                    Cancel
                 </button>
                 <button type="button" id="logoutModalConfirm" class="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-medium text-white hover:bg-red-700 transition-colors">
                     Logout

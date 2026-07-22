@@ -15,7 +15,7 @@ class TicketController extends Controller
     public function index(Request $request)
     {
         $filters = $request->only(['page', 'per_page', 'status', 'priority', 'search']);
-        $scope = $request->query('scope') === 'my' ? 'my' : 'all';
+        $scope = $request->query('scope') === 'all' ? 'all' : 'my';
 
         $endpoint = $scope === 'my' ? '/tickets/my' : '/tickets';
 
@@ -23,25 +23,28 @@ class TicketController extends Controller
 
         if ($this->handleUnauthorized($response)) {
             return redirect()->route('login')->withErrors([
-                'email' => 'Sesi berakhir, silakan login kembali.',
+                'email' => 'Your session has expired, please log in again.',
             ]);
         }
 
         if (! $response->successful()) {
             return back()->withErrors([
-                'tickets' => $response->json('message', 'Gagal memuat daftar tiket.'),
+                'tickets' => $response->json('message', 'Failed to load ticket list.'),
             ]);
         }
 
-        $stats = $this->liteApi->get('/tickets/statistics');
-
-        return view('tickets.index', [
+        $viewData = [
             'tickets' => $response->json('data', []),
             'meta' => $response->json('meta', []),
-            'stats' => $stats->successful() ? $stats->json('data', []) : [],
             'filters' => $filters,
             'scope' => $scope,
-        ]);
+        ];
+
+        if ($request->ajax()) {
+            return view('tickets.partials.results', $viewData);
+        }
+
+        return view('tickets.index', $viewData);
     }
 
     public function show(Request $request, int $id)
@@ -50,7 +53,7 @@ class TicketController extends Controller
 
         if ($this->handleUnauthorized($response)) {
             return redirect()->route('login')->withErrors([
-                'email' => 'Sesi berakhir, silakan login kembali.',
+                'email' => 'Your session has expired, please log in again.',
             ]);
         }
 
@@ -60,7 +63,7 @@ class TicketController extends Controller
 
         if (! $response->successful()) {
             return back()->withErrors([
-                'tickets' => $response->json('message', 'Gagal memuat detail tiket.'),
+                'tickets' => $response->json('message', 'Failed to load ticket details.'),
             ]);
         }
 
@@ -141,17 +144,17 @@ class TicketController extends Controller
 
         if ($this->handleUnauthorized($response)) {
             return redirect()->route('login')->withErrors([
-                'email' => 'Sesi berakhir, silakan login kembali.',
+                'email' => 'Your session has expired, please log in again.',
             ]);
         }
 
         if (! $response->successful()) {
             return back()->withErrors([
-                'status' => $response->json('message', 'Gagal mengubah status tiket.'),
+                'status' => $response->json('message', 'Failed to update ticket status.'),
             ]);
         }
 
-        return back()->with('status', 'Status tiket berhasil diubah.');
+        return back()->with('status', 'Ticket status updated successfully.');
     }
 
     public function storeMessage(Request $request, int $id)
@@ -213,24 +216,24 @@ class TicketController extends Controller
 
         if ($this->handleUnauthorized($response)) {
             return redirect()->route('login')->withErrors([
-                'email' => 'Sesi berakhir, silakan login kembali.',
+                'email' => 'Your session has expired, please log in again.',
             ]);
         }
 
         if (! $response->successful()) {
             return back()->withErrors([
-                'message' => $response->json('message', 'Gagal mengirim pesan.'),
+                'message' => $response->json('message', 'Failed to send message.'),
             ]);
         }
 
         if ($response->json('email_failed') === true) {
             return back()->with('status_warning', $response->json(
                 'email_error',
-                'Pesan tersimpan, tetapi gagal dikirim ke email customer.'
+                'Message saved, but failed to send to the customer\'s email.'
             ));
         }
 
-        return back()->with('status', 'Pesan berhasil dikirim.');
+        return back()->with('status', 'Message sent successfully.');
     }
 
     public function mentionable(Request $request)
@@ -255,7 +258,7 @@ class TicketController extends Controller
         $response = $this->liteApi->post("/tickets/{$id}/messages/{$messageId}/internal-note", $validated);
 
         if ($this->handleUnauthorized($response)) {
-            return response()->json(['success' => false, 'message' => 'Sesi berakhir, silakan login kembali.'], 401);
+            return response()->json(['success' => false, 'message' => 'Your session has expired, please log in again.'], 401);
         }
 
         return response()->json($response->json(), $response->status());
@@ -266,7 +269,7 @@ class TicketController extends Controller
         $response = $this->liteApi->delete("/tickets/{$id}/messages/{$messageId}/internal-note");
 
         if ($this->handleUnauthorized($response)) {
-            return response()->json(['success' => false, 'message' => 'Sesi berakhir, silakan login kembali.'], 401);
+            return response()->json(['success' => false, 'message' => 'Your session has expired, please log in again.'], 401);
         }
 
         return response()->json($response->json(), $response->status());
@@ -278,12 +281,12 @@ class TicketController extends Controller
 
         if ($this->handleUnauthorized($response)) {
             return redirect()->route('login')->withErrors([
-                'email' => 'Sesi berakhir, silakan login kembali.',
+                'email' => 'Your session has expired, please log in again.',
             ]);
         }
 
         if (! $response->successful()) {
-            abort($response->status(), 'Gagal memuat lampiran.');
+            abort($response->status(), 'Failed to load attachment.');
         }
 
         return response($response->body(), 200)
