@@ -86,7 +86,7 @@ class NotificationController extends Controller
 
     public function markAllRead(Request $request)
     {
-        $response = $this->liteApi->patch('/notifications/read-all');
+        $response = $this->liteApi->put('/notifications/read-all');
 
         if ($this->handleUnauthorized($response)) {
             return redirect()->route('login')->withErrors([

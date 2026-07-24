@@ -47,6 +47,15 @@
             max-width: 100%;
         }
 
+        /* iOS Safari auto-zooms the page when focusing a form field whose
+           font-size is below 16px. Forcing 16px on mobile prevents that
+           zoom (and the resulting layout shift of fixed elements). */
+        @media (max-width: 1023.98px) {
+            input, textarea, select {
+                font-size: 16px !important;
+            }
+        }
+
         table {
             max-width: 100%;
         }
@@ -249,7 +258,7 @@
         </aside>
 
         <!-- Main content -->
-        <div class="flex-1 flex flex-col lg:ml-64">
+        <div class="flex-1 flex flex-col lg:ml-64 min-w-0">
             <!-- Topbar -->
             <header id="app-header" class="fixed top-0 inset-x-0 lg:left-64 z-30 bg-white border-b border-gray-200 shadow-sm">
                 <div class="flex items-center justify-between gap-2 px-3 sm:px-6 py-3 max-w-full overflow-hidden">
@@ -300,7 +309,7 @@
                 </div>
             </header>
 
-            <main class="flex-1 p-4 sm:p-6 lg:pb-6 @hasSection('hideBottomNav') pb-4 @else pb-24 @endif" style="padding-top: calc(var(--header-h, 64px) + 1rem);">
+            <main class="flex-1 min-w-0 p-4 sm:p-6 lg:pb-6 @hasSection('hideBottomNav') pb-4 @else pb-24 @endif" style="padding-top: calc(var(--header-h, 64px) + 1rem);">
                 @if (session('status'))
                     <div class="mb-4 rounded-lg bg-green-50 border border-green-200 text-green-800 px-4 py-3 text-sm">
                         {{ session('status') }}
@@ -374,7 +383,13 @@
         function openLogoutModal(formId) {
             document.getElementById('logoutModal').classList.remove('hidden');
             document.getElementById('logoutModalConfirm').onclick = function () {
-                document.getElementById(formId).submit();
+                var form = document.getElementById(formId);
+                var submitForm = function () { form.submit(); };
+                if (window.ecosystemUnsubscribeFromPush) {
+                    window.ecosystemUnsubscribeFromPush().then(submitForm).catch(submitForm);
+                } else {
+                    submitForm();
+                }
             };
         }
 
@@ -462,6 +477,24 @@
                     });
                 }).catch(function (err) {
                     console.warn('Push subscription failed:', err);
+                });
+            };
+
+            window.ecosystemUnsubscribeFromPush = function () {
+                if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+                    return Promise.resolve();
+                }
+
+                return navigator.serviceWorker.getRegistration().then(function (reg) {
+                    if (!reg) return;
+
+                    return reg.pushManager.getSubscription().then(function (subscription) {
+                        if (!subscription) return;
+
+                        return subscription.unsubscribe();
+                    });
+                }).catch(function (err) {
+                    console.warn('Push unsubscribe failed:', err);
                 });
             };
 
